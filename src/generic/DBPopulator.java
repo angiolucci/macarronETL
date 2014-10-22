@@ -193,15 +193,21 @@ public class DBPopulator {
 			/*
 			 * ------------------------------------------------------------------
 			 */
+			
+			// Trata quando o valor do campo distrito está em branco
+			String D_DISTRICT = (String) data.get((Integer) fields.get("DISTRICT"));
+			if (D_DISTRICT.trim().isEmpty())
+				D_DISTRICT = "NONE";
+			
 			String select_d = new String("SELECT ID FROM DISTRICT WHERE "
 					+ "INFO = '"
-					+ (String) data.get((Integer) fields.get("DISTRICT")) + "'");
+					+ D_DISTRICT + "'");
 
 			d_id = DBConn.executeQuery(select_d, "id");
 			if (d_id == null) {
 				String insert_d = new String("INSERT INTO DISTRICT (" + "INFO"
 						+ ") VALUES (\'"
-						+ (String) data.get((Integer) fields.get("DISTRICT"))
+						+ D_DISTRICT
 						+ "\');");
 
 				DBConn.insertRecord(insert_d);
@@ -222,6 +228,9 @@ public class DBPopulator {
 					.get("BLOCKSITEADDRESS"));
 			S_ADDRESS = S_ADDRESS.replace('\'', ' ');
 			S_ADDRESS = S_ADDRESS.replace('\"', ' ');
+			
+			if (S_ADDRESS.trim().isEmpty())
+				S_ADDRESS = "NONE";
 
 			// Trata número de WARDs inválidos
 			String S_WARD = (String) data.get((Integer) fields.get("WARD"));
