@@ -60,6 +60,8 @@ public class DBPopulator {
 				M_METHOD = "BURGLARY 2";
 			else if (M_METHOD.equalsIgnoreCase("BFT"))
 				M_METHOD = "BLUNT FORCE TRAUMA";
+			else if (M_METHOD.equalsIgnoreCase("ARS"))
+				M_METHOD = "ARSON";
 			
 			String select_m = new String("SELECT ID FROM METHOD WHERE "
 					+ "INFO = '"
@@ -162,15 +164,21 @@ public class DBPopulator {
 			/*
 			 * ------------------------------------------------------------------
 			 */
+			
+			String O_OFFENSE = (String) data.get((Integer) fields.get("OFFENSE"));
+			
+			if (O_OFFENSE.equalsIgnoreCase("ARS"))
+				O_OFFENSE = "ARSON";
+			
 			String select_o = new String("SELECT ID FROM OFFENSE WHERE "
 					+ " INFO = '"
-					+ (String) data.get((Integer) fields.get("OFFENSE")) + "'");
+					+ O_OFFENSE + "'");
 
 			o_id = DBConn.executeQuery(select_o, "id");
 			if (o_id == null) {
 				String insert_o = new String("INSERT INTO OFFENSE (" + "INFO"
 						+ ") VALUES (\'"
-						+ (String) data.get((Integer) fields.get("OFFENSE"))
+						+ O_OFFENSE
 						+ "\');");
 				DBConn.insertRecord(insert_o);
 				o_id = DBConn.executeQuery(select_o, "id");
