@@ -170,6 +170,9 @@ public class DBPopulator {
 			if (O_OFFENSE.equalsIgnoreCase("ARS"))
 				O_OFFENSE = "ARSON";
 			
+			if (O_OFFENSE.equalsIgnoreCase("ADW"))
+				O_OFFENSE = "ASSAULT W/DANGEROUS WEAPON";
+			
 			String select_o = new String("SELECT ID FROM OFFENSE WHERE "
 					+ " INFO = '"
 					+ O_OFFENSE + "'");
