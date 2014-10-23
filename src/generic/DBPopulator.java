@@ -4,12 +4,48 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Random;
 
+class TimeWatch implements Runnable{
+	private DBPopulator bind;
+	private long lastRecord = 0;
+	private long sleepTime = 5000;
+	
+	private long sleepTimeinSec = sleepTime / 1000;
+	
+	public void run(){
+		while (!Thread.currentThread().isInterrupted()){
+			try {
+				lastRecord = bind.totalRecords;
+				Thread.sleep(sleepTime);
+				System.out.println("\nProcessed record no. " + bind.totalRecords);
+				System.out.print("AVG SPD: ");
+				System.out.print((bind.totalRecords - lastRecord) / sleepTimeinSec);
+				System.out.println(" records/second.");
+				
+				
+				
+			} catch (InterruptedException e) {
+				//throw new RuntimeException(e.getMessage());
+			}
+		}
+		System.out.println("exited the watchmen thread");
+	}
+	
+	public TimeWatch(DBPopulator bind) {
+		this.bind = bind;
+	}
+}
+
+
 public class DBPopulator {
+	public long totalRecords = 0;
+	private Thread watching;
 	
 	
 	public DBPopulator(String csv_file_path) {
+		long initTime = System.currentTimeMillis();
 		long totalInvalids = 0;
-		long totalRecords = 0;
+		watching = new Thread(new TimeWatch(this));
+		watching.start();
 		
 		FileHandler fh = new FileHandler(csv_file_path);
 		String line;
@@ -65,7 +101,7 @@ public class DBPopulator {
 			
 			String select_m = new String("SELECT * FROM NTBD_INSERT_METHOD( " +
 					"'" + M_METHOD + "')");
-			m_id = DBConn.executeQuery(select_m, "NTBD_INSERT_METHOD");
+			m_id = DBConn.execute(select_m, "NTBD_INSERT_METHOD", totalRecords);
 
 
 			
@@ -114,7 +150,7 @@ public class DBPopulator {
 					+ "," + "'" + (String) monthName.get(Integer.parseInt(strDateTmp[0])) + "'"
 					+ "," + dayOfWeek + ", " + "'" + (String) weekDayName.get(dayOfWeek) + "')");
 
-			t_id = DBConn.executeQuery(select_t, "NTBD_INSERT_TIME");
+			t_id = DBConn.execute(select_t, "NTBD_INSERT_TIME", totalRecords);
 
 
 
@@ -132,7 +168,7 @@ public class DBPopulator {
 			String select_o = new String("SELECT * FROM NTBD_INSERT_OFFENSE( "
 					+ "'" + O_OFFENSE + "')");
 
-			o_id = DBConn.executeQuery(select_o, "NTBD_INSERT_OFFENSE");
+			o_id = DBConn.execute(select_o, "NTBD_INSERT_OFFENSE", totalRecords);
 
 
 
@@ -147,7 +183,7 @@ public class DBPopulator {
 			String select_d = new String("SELECT * FROM NTBD_INSERT_DISTRICT ( "
 					+ "'" + D_DISTRICT + "')");
 
-			d_id = DBConn.executeQuery(select_d, "NTBD_INSERT_DISTRICT");
+			d_id = DBConn.execute(select_d, "NTBD_INSERT_DISTRICT", totalRecords);
 
 			
 
@@ -224,7 +260,7 @@ public class DBPopulator {
 					+ S_CLUSTER + ", " + S_PSA + ","
 					+ S_WARD + ", " + "'" + local_tmp + "')");
 
-			s_id = DBConn.executeQuery(select_s, "NTBD_INSERT_SITE");
+			s_id = DBConn.execute(select_s, "NTBD_INSERT_SITE", totalRecords);
 
 			
 			
@@ -255,14 +291,18 @@ public class DBPopulator {
 					+ F_CCN + ", " + m_id + ", " + o_id + ", "
 					+ s_id + ", " + t_id + ", " + d_id + ")");
 
-			DBConn.executeQuery(select_f, "NTBD_INSERT_FACT");
+			DBConn.execute(select_f, "NTBD_INSERT_FACT", totalRecords);
 			totalRecords++;
-			System.out.println("Processed record no. " + totalRecords);
 
 		}
 
+		watching.interrupt();
+		System.out.println("\nDONE");
 		System.out.println(totalRecords + " records were processed!");
 		System.out.println(totalInvalids + " records were dropped out!");
+		System.out.println("elapsed time: " + 
+				((System.currentTimeMillis() - initTime) / 1000) +
+				" seconds");
 	}
 
 }

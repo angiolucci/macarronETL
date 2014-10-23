@@ -14,7 +14,7 @@ public class DBConn {
 	private static final String DB_PASSWORD = " ";
 
 
-	public static Long executeQuery(String query, String idName) {
+	public static Long execute(String query, String idName, long register) {
 		Long id = null;
 		Connection conn = null;
 		Statement stmt = null;
@@ -43,13 +43,15 @@ public class DBConn {
 		} catch (SQLException se) {
 			// Handle errors for JDBC
 			se.printStackTrace();
-			System.out.println(query);
+			System.err.println("\nRegister no. " + register);
+			System.err.println(query);
 			System.exit(-1);
 
 		} catch (Exception e) {
 			// Handle errors for Class.forName
 			e.printStackTrace();
-			System.out.println(query);
+			System.err.println("\nRegister no. " + register);
+			System.err.println(query);
 			System.exit(-1);
 		} finally {
 			// finally block used to close resources
