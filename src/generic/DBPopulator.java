@@ -12,7 +12,7 @@ class TimeWatch implements Runnable{
 	private long sleepTimeinSec = sleepTime / 1000;
 	
 	public void run(){
-		while (!Thread.currentThread().isInterrupted()){
+		while (bind.keepRunning){
 			try {
 				lastRecord = bind.totalRecords;
 				Thread.sleep(sleepTime);
@@ -27,11 +27,14 @@ class TimeWatch implements Runnable{
 				//throw new RuntimeException(e.getMessage());
 			}
 		}
-		System.out.println("exited the watchmen thread");
 	}
 	
 	public TimeWatch(DBPopulator bind) {
 		this.bind = bind;
+	}
+	
+	public void kill(){
+		
 	}
 }
 
@@ -39,6 +42,7 @@ class TimeWatch implements Runnable{
 public class DBPopulator {
 	public long totalRecords = 0;
 	private Thread watching;
+	public boolean keepRunning = true;
 	
 	
 	public DBPopulator(String csv_file_path) {
@@ -296,7 +300,7 @@ public class DBPopulator {
 
 		}
 
-		watching.interrupt();
+		this.keepRunning = false;
 		System.out.println("\nDONE");
 		System.out.println(totalRecords + " records were processed!");
 		System.out.println(totalInvalids + " records were dropped out!");
