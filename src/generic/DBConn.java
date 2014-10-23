@@ -13,46 +13,6 @@ public class DBConn {
 	private static final String DB_USER = "postgres";
 	private static final String DB_PASSWORD = " ";
 
-	/*
-	public static void insertRecord(String insertTableSQL) {
-
-		Connection dbConnection = null;
-		Statement statement = null;
-
-		try {
-			dbConnection = getDBConnection();
-			statement = dbConnection.createStatement();
-			//System.out.println(insertTableSQL);
-
-			// execute insert SQL stetement
-			statement.executeUpdate(insertTableSQL);
-			//System.out.println("Record is inserted into DBUSER table!");
-			statement.close();
-			dbConnection.close();
-		} catch (SQLException e) {
-			System.out.println(e.getMessage());
-			System.out.println(insertTableSQL);
-			System.exit(-1);
-		} finally {
-			// finally block used to close resources
-			try {
-				if (statement != null)
-					statement.close();
-			} catch (SQLException se2) {
-			}// nothing we can do
-			try {
-				if (dbConnection != null)
-					dbConnection.close();
-			} catch (SQLException se) {
-				se.printStackTrace();
-				System.out.println(insertTableSQL);
-				System.exit(-1);
-
-				
-			}
-		}
-	}
-	*/
 
 	public static Long executeQuery(String query, String idName) {
 		Long id = null;

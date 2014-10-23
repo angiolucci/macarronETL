@@ -27,7 +27,6 @@ public class DBPopulator {
 			Long s_id = null;
 			Long t_id = null;
 			Long d_id = null;
-			Long ccn = null;
 
 			String regex = ",(?!\\sCUTTING)";
 			String[] data_values = line.split(regex);
@@ -256,7 +255,7 @@ public class DBPopulator {
 					+ F_CCN + ", " + m_id + ", " + o_id + ", "
 					+ s_id + ", " + t_id + ", " + d_id + ")");
 
-			ccn = DBConn.executeQuery(select_f, "NTBD_INSERT_FACT");
+			DBConn.executeQuery(select_f, "NTBD_INSERT_FACT");
 			totalRecords++;
 			System.out.println("Processed record no. " + totalRecords);
 
