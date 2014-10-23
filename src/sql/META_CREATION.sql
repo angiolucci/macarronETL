@@ -47,3 +47,84 @@ CREATE TABLE FACT (
 		M_ID, O_ID, S_ID, T_ID,
 		D_ID)
 );
+
+CREATE FUNCTION ntbd_insert_method(method_info VARCHAR) RETURNS BIGINT AS $$
+DECLARE PK BIGINT	;
+BEGIN
+	IF NOT EXISTS (SELECT ID FROM METHOD WHERE INFO = method_info) THEN
+		INSERT INTO METHOD (INFO) VALUES(method_info);
+	END IF;
+		
+	SELECT ID FROM METHOD WHERE INFO = method_info INTO PK;
+	RETURN PK;
+
+END; $$
+LANGUAGE PLPGSQL;
+
+CREATE FUNCTION ntbd_insert_time(p_month INT, p_day INT, p_year INT, p_shift VARCHAR, p_month_char VARCHAR, p_day_of_week INT, p_day_of_week_char CHAR) RETURNS BIGINT AS $$
+DECLARE PK BIGINT	;
+BEGIN
+	IF NOT EXISTS (SELECT ID FROM TIME WHERE MONTH = p_month AND DAY = p_day AND YEAR = p_year AND SHIFT = p_shift) THEN
+		INSERT INTO TIME (MONTH, DAY, YEAR, SHIFT, MONTH_CHAR, DAY_OF_WEEK, DAY_OF_WEEK_CHAR) VALUES(p_month, p_day, p_year, p_shift, p_month_char, p_day_of_week, p_day_of_week_char);
+	END IF;
+		
+	SELECT ID FROM TIME WHERE MONTH = p_month AND DAY = p_day AND YEAR = p_year AND SHIFT = p_shift INTO PK;
+	RETURN PK;
+
+END; $$
+LANGUAGE PLPGSQL;
+
+CREATE FUNCTION ntbd_insert_offense(offense_info VARCHAR) RETURNS BIGINT AS $$
+DECLARE PK BIGINT	;
+BEGIN
+	IF NOT EXISTS (SELECT ID FROM OFFENSE WHERE INFO = offense_info) THEN
+		INSERT INTO OFFENSE (INFO) VALUES(offense_info);
+	END IF;
+		
+	SELECT ID FROM OFFENSE WHERE INFO = offense_info INTO PK;
+	RETURN PK;
+
+END; $$
+LANGUAGE PLPGSQL;
+
+CREATE FUNCTION ntbd_insert_district(district_info VARCHAR) RETURNS BIGINT AS $$
+DECLARE PK BIGINT	;
+BEGIN
+	IF NOT EXISTS (SELECT ID FROM DISTRICT WHERE INFO = district_info) THEN
+		INSERT INTO DISTRICT (INFO) VALUES(district_info);
+	END IF;
+		
+	SELECT ID FROM DISTRICT WHERE INFO = district_info INTO PK;
+	RETURN PK;
+
+END; $$
+LANGUAGE PLPGSQL;
+
+
+CREATE FUNCTION ntbd_insert_site(p_address VARCHAR, p_cluster INT, p_psa INT, p_ward INT, p_region VARCHAR) RETURNS BIGINT AS $$
+DECLARE PK BIGINT	;
+BEGIN
+	IF NOT EXISTS (SELECT ID FROM SITE WHERE ADDRESS = p_address AND CLUSTER = p_cluster AND PSA = p_psa AND WARD = p_ward) THEN
+		INSERT INTO SITE (ADDRESS, CLUSTER, PSA, WARD, REGION) VALUES(p_address, p_cluster, p_psa, p_ward, p_region);
+	END IF;
+		
+	SELECT ID FROM SITE WHERE ADDRESS = p_address AND CLUSTER = p_cluster AND PSA = p_psa AND WARD = p_ward INTO PK;
+	RETURN PK;
+
+END; $$
+LANGUAGE PLPGSQL;
+
+CREATE FUNCTION ntbd_insert_fact(p_ccn BIGINT, p_m_id INT, p_o_id INT, p_s_id INT, p_t_id INT, p_d_id INT) RETURNS BIGINT AS $$
+DECLARE PK BIGINT	;
+BEGIN
+	IF NOT EXISTS (SELECT CCN FROM FACT WHERE M_ID = p_m_id AND O_ID = p_o_id AND S_ID = p_s_id AND T_ID = p_t_id AND D_ID = p_d_id) THEN
+		INSERT INTO FACT (M_ID, O_ID, S_ID, T_ID, D_ID, CCN) VALUES(p_m_id, p_o_id, p_s_id, p_t_id, p_d_id, p_ccn);
+	END IF;
+		
+	SELECT CCN FROM FACT WHERE M_ID = p_m_id AND O_ID = p_o_id AND S_ID = p_s_id AND T_ID = p_t_id AND D_ID = p_d_id INTO PK;
+	RETURN PK;
+
+END; $$
+LANGUAGE PLPGSQL;
+
+

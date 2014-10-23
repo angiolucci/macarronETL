@@ -9,10 +9,11 @@ import java.sql.Statement;
 public class DBConn {
 
 	private static final String DB_DRIVER = "org.postgresql.Driver";
-	private static final String DB_CONNECTION = "jdbc:postgresql://localhost/dw_prototype";
+	private static final String DB_CONNECTION = "jdbc:postgresql://localhost/dw_proto2";
 	private static final String DB_USER = "postgres";
 	private static final String DB_PASSWORD = " ";
 
+	/*
 	public static void insertRecord(String insertTableSQL) {
 
 		Connection dbConnection = null;
@@ -51,6 +52,7 @@ public class DBConn {
 			}
 		}
 	}
+	*/
 
 	public static Long executeQuery(String query, String idName) {
 		Long id = null;

@@ -5,10 +5,12 @@ import java.util.HashMap;
 import java.util.Random;
 
 public class DBPopulator {
+	
+	
 	public DBPopulator(String csv_file_path) {
-		long totalRecords = 0;
 		long totalInvalids = 0;
-
+		long totalRecords = 0;
+		
 		FileHandler fh = new FileHandler(csv_file_path);
 		String line;
 		HashMap<String, Integer> fields = new HashMap<String, Integer>();
@@ -39,16 +41,15 @@ public class DBPopulator {
 			* do esperado, ignora o registro
 			*/
 			if (field_names.length != data_values.length){
-				System.out.println(field_names.length + " " + data_values.length);
 				System.err.println("Ignorando registro " + (++totalRecords) + " com campos inválidos");
 				totalInvalids++;
 				continue;
 			}
+			
+			
+			
 
 			/* TABLE METHOD */
-			/*
-			 * ------------------------------------------------------------------
-			 */
 			
 			// Padroniza as várias notações para um mesmo METHOD
 			String M_METHOD = (String) data.get((Integer) fields.get("METHOD"));
@@ -63,29 +64,14 @@ public class DBPopulator {
 			else if (M_METHOD.equalsIgnoreCase("ARS"))
 				M_METHOD = "ARSON";
 			
-			String select_m = new String("SELECT ID FROM METHOD WHERE "
-					+ "INFO = '"
-					+ M_METHOD + "'");
-			m_id = DBConn.executeQuery(select_m, "id");
+			String select_m = new String("SELECT * FROM NTBD_INSERT_METHOD( " +
+					"'" + M_METHOD + "')");
+			m_id = DBConn.executeQuery(select_m, "NTBD_INSERT_METHOD");
 
-			if (m_id == null) {
-				String insert_m = new String("INSERT INTO METHOD (" + "INFO"
-						+ ") VALUES (\'"
-						+ M_METHOD
-						+ "\');");
 
-				DBConn.insertRecord(insert_m);
-				m_id = DBConn.executeQuery(select_m, "id");
-			}
-
-			/*
-			 * ------------------------------------------------------------------
-			 */
-
+			
+			
 			/* TABLE TIME */
-			/*
-			 * ------------------------------------------------------------------
-			 */
 
 			HashMap<Integer, String> monthName = new HashMap<Integer, String>();
 			monthName.put(1, "JANUARY");
@@ -121,50 +107,21 @@ public class DBPopulator {
 					Integer.parseInt(strDateTmp[1]));
 			int dayOfWeek = c.get(Calendar.DAY_OF_WEEK);
 
-			String select_t = new String("SELECT ID FROM TIME WHERE "
-					+ "MONTH = "
-					+ strDateTmp[0]
-					+ " AND DAY = "
-					+ strDateTmp[1]
-					+ " AND YEAR = "
-					+ strDateTmp[2]
-					+ " AND SHIFT = '"
-					+ (String) data.get((Integer) fields.get("SHIFT"))
-							.substring(0, 3) + "'");
+			String select_t = new String("SELECT * FROM NTBD_INSERT_TIME( "
+					+ strDateTmp[0] + ","
+					+ strDateTmp[1] + ","
+					+ strDateTmp[2] + ","
+					+ "'" + (String) data.get((Integer) fields.get("SHIFT")).substring(0, 3) + "'"
+					+ "," + "'" + (String) monthName.get(Integer.parseInt(strDateTmp[0])) + "'"
+					+ "," + dayOfWeek + ", " + "'" + (String) weekDayName.get(dayOfWeek) + "')");
 
-			t_id = DBConn.executeQuery(select_t, "id");
-			if (t_id == null) {
-				String insert_t = new String("INSERT INTO TIME ("
-						+ "MONTH, DAY, YEAR, SHIFT, MONTH_CHAR, DAY_OF_WEEK,"
-						+ "DAY_OF_WEEK_CHAR"
-						+ ") VALUES ("
-						+ strDateTmp[0]
-						+ ", "
-						+ strDateTmp[1]
-						+ ", "
-						+ strDateTmp[2]
-						+ ", '"
-						+ (String) data.get((Integer) fields.get("SHIFT"))
-								.substring(0, 3)
-						+ "', "
-						+ "'"
-						+ (String) monthName.get(Integer
-								.parseInt(strDateTmp[0])) + "', " + dayOfWeek
-						+ ", " + "'" + (String) weekDayName.get(dayOfWeek)
-						+ "'" + ");");
-				DBConn.insertRecord(insert_t);
-				t_id = DBConn.executeQuery(select_t, "id");
-			}
+			t_id = DBConn.executeQuery(select_t, "NTBD_INSERT_TIME");
 
-			/*
-			 * ------------------------------------------------------------------
-			 */
 
+
+	
 			/* TABLE OFFENSE */
-			/*
-			 * ------------------------------------------------------------------
-			 */
-			
+
 			String O_OFFENSE = (String) data.get((Integer) fields.get("OFFENSE"));
 			
 			if (O_OFFENSE.equalsIgnoreCase("ARS"))
@@ -173,58 +130,30 @@ public class DBPopulator {
 			if (O_OFFENSE.equalsIgnoreCase("ADW"))
 				O_OFFENSE = "ASSAULT W/DANGEROUS WEAPON";
 			
-			String select_o = new String("SELECT ID FROM OFFENSE WHERE "
-					+ " INFO = '"
-					+ O_OFFENSE + "'");
+			String select_o = new String("SELECT * FROM NTBD_INSERT_OFFENSE( "
+					+ "'" + O_OFFENSE + "')");
 
-			o_id = DBConn.executeQuery(select_o, "id");
-			if (o_id == null) {
-				String insert_o = new String("INSERT INTO OFFENSE (" + "INFO"
-						+ ") VALUES (\'"
-						+ O_OFFENSE
-						+ "\');");
-				DBConn.insertRecord(insert_o);
-				o_id = DBConn.executeQuery(select_o, "id");
+			o_id = DBConn.executeQuery(select_o, "NTBD_INSERT_OFFENSE");
 
-			}
 
-			/*
-			 * ------------------------------------------------------------------
-			 */
 
+			
 			/* TABLE DISTRICT */
-			/*
-			 * ------------------------------------------------------------------
-			 */
 			
 			// Trata quando o valor do campo distrito está em branco
 			String D_DISTRICT = (String) data.get((Integer) fields.get("DISTRICT"));
 			if (D_DISTRICT.trim().isEmpty())
 				D_DISTRICT = "NONE";
 			
-			String select_d = new String("SELECT ID FROM DISTRICT WHERE "
-					+ "INFO = '"
-					+ D_DISTRICT + "'");
+			String select_d = new String("SELECT * FROM NTBD_INSERT_DISTRICT ( "
+					+ "'" + D_DISTRICT + "')");
 
-			d_id = DBConn.executeQuery(select_d, "id");
-			if (d_id == null) {
-				String insert_d = new String("INSERT INTO DISTRICT (" + "INFO"
-						+ ") VALUES (\'"
-						+ D_DISTRICT
-						+ "\');");
+			d_id = DBConn.executeQuery(select_d, "NTBD_INSERT_DISTRICT");
 
-				DBConn.insertRecord(insert_d);
-				d_id = DBConn.executeQuery(select_d, "id");
-			}
+			
 
-			/*
-			 * ------------------------------------------------------------------
-			 */
 
 			/* TABLE SITE */
-			/*
-			 * ------------------------------------------------------------------
-			 */
 
 			// Trata caracteres inválidos no endereço
 			String S_ADDRESS = (String) data.get((Integer) fields
@@ -261,7 +190,7 @@ public class DBPopulator {
 				S_PSA = "0";
 			}
 
-			String local_tmp = "NULL";
+			String local_tmp = " ";
 			String[] region_tmp = ((String) data.get((Integer) fields
 					.get("BLOCKSITEADDRESS"))).split(" ");
 
@@ -289,35 +218,19 @@ public class DBPopulator {
 					|| region_tmp[region_tmp.length - 1].equalsIgnoreCase("NW")
 					|| region_tmp[region_tmp.length - 1]
 							.equalsIgnoreCase("NNW"))
-				local_tmp = "'" + region_tmp[region_tmp.length - 1] + "'";
+				local_tmp = region_tmp[region_tmp.length - 1];
 
-			String select_s = new String("SELECT ID FROM SITE WHERE "
-					+ "ADDRESS = '" + S_ADDRESS + "'" + " AND CLUSTER = "
-					+ S_CLUSTER + " AND PSA = " + S_PSA + " AND WARD = "
-					+ S_WARD);
+			String select_s = new String("SELECT * FROM NTBD_INSERT_SITE( "
+					+ "'" + S_ADDRESS + "'" + ", "
+					+ S_CLUSTER + ", " + S_PSA + ","
+					+ S_WARD + ", " + "'" + local_tmp + "')");
 
-			s_id = DBConn.executeQuery(select_s, "id");
-			if (s_id == null) {
-				String insert_s = new String("INSERT INTO SITE ("
-						+ "ADDRESS, CLUSTER, PSA, WARD, REGION"
-						+ ") VALUES (\'" + S_ADDRESS + "\', " + S_CLUSTER
-						+ ", " + S_PSA + ", " + S_WARD + ", " + local_tmp
-						+ ");");
+			s_id = DBConn.executeQuery(select_s, "NTBD_INSERT_SITE");
 
-				DBConn.insertRecord(insert_s);
-				s_id = DBConn.executeQuery(select_s, "id");
-
-			}
-
-			/*
-			 * ------------------------------------------------------------------
-			 */
-
-			/*
-			 * ----------------------------------------------------------------
-			 * TABLE FACT
-			 * ----------------------------------------------------------------
-			 */
+			
+			
+			
+			 /* TABLE FACT */
 
 			// Existem algumas tabelas fora de padrão, que adotam campos
 			// diferentes como chave (CCN ou NID). Para o caso onde houverem
@@ -339,21 +252,12 @@ public class DBPopulator {
 				}
 			}
 
-			String select_f = new String("SELECT CCN FROM FACT WHERE "
-					+ "M_ID = " + m_id + " AND O_ID = " + o_id + " AND S_ID = "
-					+ s_id + " AND T_ID  = " + t_id + " AND D_ID  = " + d_id);
+			String select_f = new String("SELECT * FROM NTBD_INSERT_FACT( "
+					+ F_CCN + ", " + m_id + ", " + o_id + ", "
+					+ s_id + ", " + t_id + ", " + d_id + ")");
 
-			ccn = DBConn.executeQuery(select_f, "ccn");
-
-			if (ccn == null) {
-				String insert_f = new String("INSERT INTO FACT (" + "CCN"
-						+ " ,M_ID, O_ID, S_ID, " + "T_ID, D_ID) " + "VALUES ("
-						+ F_CCN + ", " + m_id + ", " + o_id + ", " + s_id
-						+ ", " + t_id + ", " + d_id + ")");
-				DBConn.insertRecord(insert_f);
-				ccn = DBConn.executeQuery(select_f, "ccn");
-				totalRecords++;
-			}
+			ccn = DBConn.executeQuery(select_f, "NTBD_INSERT_FACT");
+			totalRecords++;
 			System.out.println("Processed record no. " + totalRecords);
 
 		}
@@ -361,4 +265,5 @@ public class DBPopulator {
 		System.out.println(totalRecords + " records were processed!");
 		System.out.println(totalInvalids + " records were dropped out!");
 	}
+
 }
