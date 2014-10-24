@@ -8,10 +8,13 @@ class TimeWatch implements Runnable{
 	private DBPopulator bind;
 	private long lastRecord = 0;
 	private long sleepTime = 5000;
+	private long initTime = 0;
 	
 	private long sleepTimeinSec = sleepTime / 1000;
 	
 	public void run(){
+		initTime = System.currentTimeMillis();
+		
 		while (bind.keepRunning){
 			try {
 				lastRecord = bind.totalRecords;
@@ -27,15 +30,19 @@ class TimeWatch implements Runnable{
 				//throw new RuntimeException(e.getMessage());
 			}
 		}
+		
+		System.out.println("\nDONE");
+		System.out.println(bind.totalRecords + " records were loaded into DB!");
+		System.out.println(bind.totalInvalids + " records were dropped out!");
+		System.out.println("elapsed time: " + 
+				((System.currentTimeMillis() - initTime) / 1000) +
+				" seconds");
 	}
 	
 	public TimeWatch(DBPopulator bind) {
 		this.bind = bind;
 	}
-	
-	public void kill(){
-		
-	}
+
 }
 
 
@@ -43,11 +50,9 @@ public class DBPopulator {
 	public long totalRecords = 0;
 	private Thread watching;
 	public boolean keepRunning = true;
-	
-	
+	public long totalInvalids = 0;
 	public DBPopulator(String csv_file_path) {
-		long initTime = System.currentTimeMillis();
-		long totalInvalids = 0;
+		
 		watching = new Thread(new TimeWatch(this));
 		watching.start();
 		
@@ -304,12 +309,6 @@ public class DBPopulator {
 		}
 
 		this.keepRunning = false;
-		System.out.println("\nDONE");
-		System.out.println(totalRecords + " records were processed!");
-		System.out.println(totalInvalids + " records were dropped out!");
-		System.out.println("elapsed time: " + 
-				((System.currentTimeMillis() - initTime) / 1000) +
-				" seconds");
 	}
 
 }
