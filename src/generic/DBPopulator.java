@@ -169,6 +169,9 @@ public class DBPopulator {
 			if (O_OFFENSE.equalsIgnoreCase("ADW"))
 				O_OFFENSE = "ASSAULT W/DANGEROUS WEAPON";
 			
+			if (O_OFFENSE.equalsIgnoreCase("THEFT"))
+				O_OFFENSE = "THEFT/OTHER";
+			
 			String select_o = new String("SELECT * FROM NTBD_INSERT_OFFENSE( "
 					+ "'" + O_OFFENSE + "')");
 
