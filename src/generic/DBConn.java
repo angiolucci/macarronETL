@@ -9,7 +9,7 @@ import java.sql.Statement;
 public class DBConn {
 
 	private static final String DB_DRIVER = "org.postgresql.Driver";
-	private static final String DB_CONNECTION = "jdbc:postgresql://localhost/dw_proto2";
+	private static final String DB_CONNECTION = "jdbc:postgresql://localhost/NTBD";
 	private static final String DB_USER = "postgres";
 	private static final String DB_PASSWORD = " ";
 
