@@ -51,6 +51,10 @@ public class DBPopulator {
 	private Thread watching;
 	public boolean keepRunning = true;
 	public long totalInvalids = 0;
+	private DBConn dbconn = new DBConn();
+	
+	
+	
 	public DBPopulator(String csv_file_path) {
 		
 		watching = new Thread(new TimeWatch(this));
@@ -110,7 +114,7 @@ public class DBPopulator {
 			
 			String select_m = new String("SELECT * FROM NTBD_INSERT_METHOD( " +
 					"'" + M_METHOD + "')");
-			m_id = DBConn.execute(select_m, "NTBD_INSERT_METHOD", totalRecords);
+			m_id = dbconn.execute(select_m, "NTBD_INSERT_METHOD", totalRecords);
 
 
 			
@@ -159,7 +163,7 @@ public class DBPopulator {
 					+ "," + "'" + (String) monthName.get(Integer.parseInt(strDateTmp[0])) + "'"
 					+ "," + dayOfWeek + ", " + "'" + (String) weekDayName.get(dayOfWeek) + "')");
 
-			t_id = DBConn.execute(select_t, "NTBD_INSERT_TIME", totalRecords);
+			t_id = dbconn.execute(select_t, "NTBD_INSERT_TIME", totalRecords);
 
 
 
@@ -180,7 +184,7 @@ public class DBPopulator {
 			String select_o = new String("SELECT * FROM NTBD_INSERT_OFFENSE( "
 					+ "'" + O_OFFENSE + "')");
 
-			o_id = DBConn.execute(select_o, "NTBD_INSERT_OFFENSE", totalRecords);
+			o_id = dbconn.execute(select_o, "NTBD_INSERT_OFFENSE", totalRecords);
 
 
 
@@ -195,7 +199,7 @@ public class DBPopulator {
 			String select_d = new String("SELECT * FROM NTBD_INSERT_DISTRICT ( "
 					+ "'" + D_DISTRICT + "')");
 
-			d_id = DBConn.execute(select_d, "NTBD_INSERT_DISTRICT", totalRecords);
+			d_id = dbconn.execute(select_d, "NTBD_INSERT_DISTRICT", totalRecords);
 
 			
 
@@ -272,7 +276,7 @@ public class DBPopulator {
 					+ S_CLUSTER + ", " + S_PSA + ","
 					+ S_WARD + ", " + "'" + local_tmp + "')");
 
-			s_id = DBConn.execute(select_s, "NTBD_INSERT_SITE", totalRecords);
+			s_id = dbconn.execute(select_s, "NTBD_INSERT_SITE", totalRecords);
 
 			
 			
@@ -303,12 +307,13 @@ public class DBPopulator {
 					+ F_CCN + ", " + m_id + ", " + o_id + ", "
 					+ s_id + ", " + t_id + ", " + d_id + ")");
 
-			DBConn.execute(select_f, "NTBD_INSERT_FACT", totalRecords);
+			dbconn.execute(select_f, "NTBD_INSERT_FACT", totalRecords);
 			totalRecords++;
 
 		}
 
 		this.keepRunning = false;
+		dbconn.close();
 	}
 
 }
