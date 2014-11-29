@@ -11,6 +11,7 @@ Utiliza o [Criminal Reports](http://data.dc.gov/) do Distrito de Columbia como f
 Configurando a conexão com o banco de dados
 -------------------------------------------
 
-De modo provisório, os dados de conexão (USER,PASSWD e DATABASE) devem
-ser configurados dentro do arquivo DBConn.java.
-A alteração desses valores exige a recompilação da classe.
+É possível alterar os parâmetros de configuração da conexão (connection, user, password) diretamente
+no arquivo dbconn.cfg. O arquivo contém uma rápida documentação sobre o uso e alguns exemplos.
+Dependendo do modo de execução do macarronETL (pelo Eclipse ou standalone via terminal) pode ser necessário
+copiar o arquivo para o diretório de build das classes.
