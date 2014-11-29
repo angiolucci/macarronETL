@@ -4,68 +4,85 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Random;
 
-class TimeWatch implements Runnable{
-	private DBPopulator bind;
+class TimeWatch implements Runnable {
+	private Populator bind;
 	private long lastRecord = 0;
 	private long sleepTime = 5000;
 	private long initTime = 0;
 	
+	private long watchDogCounter = 0;
+	private final long watchDogLimit = 3;
+
+
 	private long sleepTimeinSec = sleepTime / 1000;
-	
-	public void run(){
+
+	public void run() {
 		initTime = System.currentTimeMillis();
-		
-		while (bind.keepRunning){
+
+		while ( bind.keepRunning && (watchDogCounter != watchDogLimit)) {
 			try {
 				lastRecord = bind.totalRecords;
 				Thread.sleep(sleepTime);
-				System.out.println("\nProcessed record no. " + bind.totalRecords);
+				System.out.println("\nProcessed record no. "
+						+ bind.totalRecords);
 				System.out.print("AVG SPD: ");
-				System.out.print((bind.totalRecords - lastRecord) / sleepTimeinSec);
+				System.out.print((bind.totalRecords - lastRecord)
+						/ sleepTimeinSec);
 				System.out.println(" records/second.");
 				
-				
-				
+				if ( bind.totalRecords - lastRecord == 0)
+					watchDogCounter++;
+				else
+					watchDogCounter = 0;
+
 			} catch (InterruptedException e) {
-				//throw new RuntimeException(e.getMessage());
+				// throw new RuntimeException(e.getMessage());
 			}
 		}
-		
+
 		System.out.println("\nDONE");
 		System.out.println(bind.totalRecords + " records were loaded into DB!");
 		System.out.println(bind.totalInvalids + " records were dropped out!");
-		System.out.println("elapsed time: " + 
-				((System.currentTimeMillis() - initTime) / 1000) +
-				" seconds");
+		System.out
+				.println("elapsed time: "
+						+ ((System.currentTimeMillis() - initTime) / 1000)
+						+ " seconds");
 	}
-	
-	public TimeWatch(DBPopulator bind) {
+
+	public TimeWatch(Populator bind) {
 		this.bind = bind;
 	}
 
 }
 
-
-public class DBPopulator {
+public class Populator {
 	public long totalRecords = 0;
 	private Thread watching;
-	public boolean keepRunning = true;
 	public long totalInvalids = 0;
-	private DBConn dbconn = new DBConn();
-	
-	
-	
-	public DBPopulator(String csv_file_path) {
+	private DBConn dbconn = null;
+	public boolean keepRunning = true;
+
+	public Populator(String csv_file_path) {
+
+		FileHandler fh = null;
 		
 		watching = new Thread(new TimeWatch(this));
 		watching.start();
+
+		try {
+			fh = new FileHandler(csv_file_path);
+		} catch (RuntimeException rte){
+			System.err.println(rte.getMessage());
+			System.exit(-1);
+		}
 		
-		FileHandler fh = new FileHandler(csv_file_path);
+		this.dbconn = new DBConn();
 		String line;
 		HashMap<String, Integer> fields = new HashMap<String, Integer>();
 		HashMap<Integer, String> data = new HashMap<Integer, String>();
 
 		line = fh.readLine();
+		
 		String[] field_names = line.split(",");
 		for (int i = 0; i < field_names.length; i++)
 			fields.put(field_names[i], i);
@@ -82,23 +99,20 @@ public class DBPopulator {
 			for (int i = 0; i < data_values.length; i++) {
 				data.put(i, data_values[i]);
 			}
-			
-			
+
 			/*
-			* Se o número de campos do registro for diferente
-			* do esperado, ignora o registro
-			*/
-			if (field_names.length != data_values.length){
-				System.err.println("Ignorando registro " + (++totalRecords) + " com campos inválidos");
+			 * Se o número de campos do registro for diferente do esperado,
+			 * ignora o registro
+			 */
+			if (field_names.length != data_values.length) {
+				System.err.println("Ignorando registro " + (++totalRecords)
+						+ " com campos inválidos");
 				totalInvalids++;
 				continue;
 			}
-			
-			
-			
 
 			/* TABLE METHOD */
-			
+
 			// Padroniza as várias notações para um mesmo METHOD
 			String M_METHOD = (String) data.get((Integer) fields.get("METHOD"));
 			if (M_METHOD.contains("KNIFE"))
@@ -111,14 +125,11 @@ public class DBPopulator {
 				M_METHOD = "BLUNT FORCE TRAUMA";
 			else if (M_METHOD.equalsIgnoreCase("ARS"))
 				M_METHOD = "ARSON";
-			
-			String select_m = new String("SELECT * FROM NTBD_INSERT_METHOD( " +
-					"'" + M_METHOD + "')");
+
+			String select_m = new String("SELECT * FROM NTBD_INSERT_METHOD( "
+					+ "'" + M_METHOD + "')");
 			m_id = dbconn.execute(select_m, "NTBD_INSERT_METHOD", totalRecords);
 
-
-			
-			
 			/* TABLE TIME */
 
 			HashMap<Integer, String> monthName = new HashMap<Integer, String>();
@@ -156,53 +167,55 @@ public class DBPopulator {
 			int dayOfWeek = c.get(Calendar.DAY_OF_WEEK);
 
 			String select_t = new String("SELECT * FROM NTBD_INSERT_TIME( "
-					+ strDateTmp[0] + ","
-					+ strDateTmp[1] + ","
-					+ strDateTmp[2] + ","
-					+ "'" + (String) data.get((Integer) fields.get("SHIFT")).substring(0, 3) + "'"
-					+ "," + "'" + (String) monthName.get(Integer.parseInt(strDateTmp[0])) + "'"
-					+ "," + dayOfWeek + ", " + "'" + (String) weekDayName.get(dayOfWeek) + "')");
+					+ strDateTmp[0]
+					+ ","
+					+ strDateTmp[1]
+					+ ","
+					+ strDateTmp[2]
+					+ ","
+					+ "'"
+					+ (String) data.get((Integer) fields.get("SHIFT"))
+							.substring(0, 3) + "'" + "," + "'"
+					+ (String) monthName.get(Integer.parseInt(strDateTmp[0]))
+					+ "'" + "," + dayOfWeek + ", " + "'"
+					+ (String) weekDayName.get(dayOfWeek) + "')");
 
 			t_id = dbconn.execute(select_t, "NTBD_INSERT_TIME", totalRecords);
 
-
-
-	
 			/* TABLE OFFENSE */
 
-			String O_OFFENSE = (String) data.get((Integer) fields.get("OFFENSE"));
-			
+			String O_OFFENSE = (String) data.get((Integer) fields
+					.get("OFFENSE"));
+
 			if (O_OFFENSE.equalsIgnoreCase("ARS"))
 				O_OFFENSE = "ARSON";
-			
+
 			if (O_OFFENSE.equalsIgnoreCase("ADW"))
 				O_OFFENSE = "ASSAULT W/DANGEROUS WEAPON";
-			
+
 			if (O_OFFENSE.equalsIgnoreCase("THEFT"))
 				O_OFFENSE = "THEFT/OTHER";
-			
+
 			String select_o = new String("SELECT * FROM NTBD_INSERT_OFFENSE( "
 					+ "'" + O_OFFENSE + "')");
 
-			o_id = dbconn.execute(select_o, "NTBD_INSERT_OFFENSE", totalRecords);
+			o_id = dbconn
+					.execute(select_o, "NTBD_INSERT_OFFENSE", totalRecords);
 
-
-
-			
 			/* TABLE DISTRICT */
-			
+
 			// Trata quando o valor do campo distrito está em branco
-			String D_DISTRICT = (String) data.get((Integer) fields.get("DISTRICT"));
+			String D_DISTRICT = (String) data.get((Integer) fields
+					.get("DISTRICT"));
 			if (D_DISTRICT.trim().isEmpty())
 				D_DISTRICT = "NONE";
-			
-			String select_d = new String("SELECT * FROM NTBD_INSERT_DISTRICT ( "
-					+ "'" + D_DISTRICT + "')");
 
-			d_id = dbconn.execute(select_d, "NTBD_INSERT_DISTRICT", totalRecords);
+			String select_d = new String(
+					"SELECT * FROM NTBD_INSERT_DISTRICT ( " + "'" + D_DISTRICT
+							+ "')");
 
-			
-
+			d_id = dbconn.execute(select_d, "NTBD_INSERT_DISTRICT",
+					totalRecords);
 
 			/* TABLE SITE */
 
@@ -211,7 +224,7 @@ public class DBPopulator {
 					.get("BLOCKSITEADDRESS"));
 			S_ADDRESS = S_ADDRESS.replace('\'', ' ');
 			S_ADDRESS = S_ADDRESS.replace('\"', ' ');
-			
+
 			if (S_ADDRESS.trim().isEmpty())
 				S_ADDRESS = "NONE";
 
@@ -272,16 +285,12 @@ public class DBPopulator {
 				local_tmp = region_tmp[region_tmp.length - 1];
 
 			String select_s = new String("SELECT * FROM NTBD_INSERT_SITE( "
-					+ "'" + S_ADDRESS + "'" + ", "
-					+ S_CLUSTER + ", " + S_PSA + ","
-					+ S_WARD + ", " + "'" + local_tmp + "')");
+					+ "'" + S_ADDRESS + "'" + ", " + S_CLUSTER + ", " + S_PSA
+					+ "," + S_WARD + ", " + "'" + local_tmp + "')");
 
 			s_id = dbconn.execute(select_s, "NTBD_INSERT_SITE", totalRecords);
 
-			
-			
-			
-			 /* TABLE FACT */
+			/* TABLE FACT */
 
 			// Existem algumas tabelas fora de padrão, que adotam campos
 			// diferentes como chave (CCN ou NID). Para o caso onde houverem
@@ -304,14 +313,13 @@ public class DBPopulator {
 			}
 
 			String select_f = new String("SELECT * FROM NTBD_INSERT_FACT( "
-					+ F_CCN + ", " + m_id + ", " + o_id + ", "
-					+ s_id + ", " + t_id + ", " + d_id + ")");
+					+ F_CCN + ", " + m_id + ", " + o_id + ", " + s_id + ", "
+					+ t_id + ", " + d_id + ")");
 
 			dbconn.execute(select_f, "NTBD_INSERT_FACT", totalRecords);
 			totalRecords++;
 
 		}
-
 		this.keepRunning = false;
 		dbconn.close();
 	}

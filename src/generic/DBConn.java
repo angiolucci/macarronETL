@@ -5,13 +5,16 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 
 public class DBConn {
 
 	private static final String DB_DRIVER = "org.postgresql.Driver";
-	private static final String DB_CONNECTION = "jdbc:postgresql://localhost/dw_proto2";
-	private static final String DB_USER = "postgres";
-	private static final String DB_PASSWORD = " ";
+	//private static final String DB_CONNECTION = "jdbc:postgresql://localhost/dw_proto2";
+	//private static final String DB_USER = "postgres";
+	//private static final String DB_PASSWORD = " ";
+	
+	
 	private Connection dbConnection = null;
 	
 	
@@ -57,6 +60,11 @@ public class DBConn {
 	}
 
 	public DBConn() {
+		DBConfigReader reader = new DBConfigReader("dbconn.cfg");
+		HashMap<String, String> props= reader.getConnProperties();
+		String DB_CONNECTION =  (String) props.get("connection");
+		String DB_USER =  (String) props.get("user");
+		String DB_PASSWORD =  (String) props.get("password");
 
 		try {
 			

@@ -8,8 +8,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 public class FileHandler {
-	private	static File file;
-	private static BufferedReader bf;
+	private	File file;
+	private BufferedReader bf;
 		
 	
 	public FileHandler(String filePath){
@@ -24,11 +24,15 @@ public class FileHandler {
 	}
 	
 	public String readLine(){
+		String returnStr = null;
+		
 		try {
-			return bf.readLine();
+			returnStr =  bf.readLine();
 		} catch (IOException e) {
 			throw new RuntimeException(e.getMessage());
 		}
+		
+		return returnStr;
 	}
 	
 	public void write(String filePath, String buffer){
